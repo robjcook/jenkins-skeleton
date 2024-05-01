@@ -3,11 +3,11 @@ pipeline {
     stages {
         stage('Example') {
             steps {
-                sh """
+                sh '''
                     echo "This is line 1"
                     echo "This is line 2"
                     echo "This is line 3"
-                """
+                '''
             }
         }
     }
