@@ -8,6 +8,9 @@ if (job) {
     job.metaClass.properties.each { prop ->
         println "- ${prop.name}: ${job."${prop.name}"}"
     }
+    job.properties.each { property ->
+        println "- ${property.getClass().getSimpleName()}: ${property.toString()}"
+    }
 } else {
     println "Job not found: $jobName"
 }
