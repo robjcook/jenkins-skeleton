@@ -1,0 +1,74 @@
+version: '3.1'
+services:
+  jenkins:
+    user: root
+    image: 'jenkinsci/blueocean:latest'
+    #container_name: 'jenkins'
+    ports:
+      - '8888:8080'
+      - '50000:50000'
+    volumes:
+      - jenkins:/var/jenkins_home
+      - ~/.ssh/id_rsa:/home/root/.ssh/id_rsa
+      - ~/.ssh/id_rsa.pub:/home/root/.ssh/id_rsa.pub
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - jenkins-network
+      - sonar-network
+    depends_on:
+      - docker
+    deploy:
+      restart_policy:
+        condition: always
+  sonarqube:
+    image: sonarqube:latest
+    expose:
+      - 9000
+    ports:
+      - "9000:9000"
+    networks:
+      - sonar-network
+    depends_on:
+      - db
+    restart: always
+    environment:
+      - SONARQUBE_JDBC_USERNAME=
+      - SONARQUBE_JDBC_PASSWORD=
+      - SONARQUBE_JDBC_URL=jdbc:postgresql://db:5432/postgres
+    volumes:
+      - sonar_conf:/opt/sonarqube/conf
+      - sonar_data:/opt/sonarqube/data
+      - sonar_extensions:/opt/sonarqube/extensions
+      - sonar_bundled-plugins:/opt/sonarqube/lib/bundled-plugins
+    deploy:
+      restart_policy:
+        condition: always
+  db:
+    image: postgres:9.6
+    ports:
+      - "5433:5432"
+    networks:
+      - sonar-network
+    environment:
+      - POSTGRES_PASSWORD=
+    volumes:
+      - sonarpostgres:/var/lib/postgresql
+      - sonarpostgres_data:/var/lib/postgresql/data
+    deploy:
+      restart_policy:
+        condition: always
+
+volumes:
+  jenkins:
+    driver: local
+  sonar_conf:
+  sonar_data:
+  sonar_extensions:
+  sonar_bundled-plugins:
+  sonarpostgres:
+  sonarpostgres_data:
+networks:
+  jenkins-network:
+    driver: bridge
+  sonar-network:
+    driver: bridge
